@@ -1,0 +1,4 @@
+com\fipeapi1\Main.class
+com\fipeapi1\resources\CargaInicialResource.class
+com\fipeapi1\services\FipeApiClient.class
+com\fipeapi1\services\FipeService.class
