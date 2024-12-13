@@ -1,4 +1,8 @@
-C:\Users\DELL\IdeaProjects\auth-api\FipeApi\src\main\java\com\fipeapi1\resources\CargaInicialResource.java
-C:\Users\DELL\IdeaProjects\auth-api\FipeApi\src\main\java\com\fipeapi1\services\FipeApiClient.java
-C:\Users\DELL\IdeaProjects\auth-api\FipeApi\src\main\java\com\fipeapi1\services\FipeService.java
-C:\Users\DELL\IdeaProjects\auth-api\FipeApi\src\main\java\com\fipeapi1\Main.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi2\services\FipeProcessingService.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi1\services\FipeService.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi1\services\VeiculoService.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi1\Main.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi1\resources\VeiculoResource.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi1\resources\MarcaResource.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi2\entities\Veiculo.java
+C:\Users\DELL\IdeaProjects\directoryLoco\FipeApi\src\main\java\com\fipeapi2\repositories\VeiculoRepository.java

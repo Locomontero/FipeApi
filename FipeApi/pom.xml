@@ -53,6 +53,18 @@
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
 
+            <!-- Dependência do Quarkus para trabalhar com Hibernate e Panache -->
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-hibernate-orm-panache</artifactId>
+            </dependency>
+
+        <!-- Dependência para JSON-B (JSON Binding) no Quarkus -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jsonb</artifactId>
+        </dependency>
+
         <!-- Quarkus OpenAPI para documentação -->
         <dependency>
             <groupId>io.quarkus</groupId>

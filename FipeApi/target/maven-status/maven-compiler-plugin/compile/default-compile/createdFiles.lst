@@ -1,4 +1,8 @@
 com\fipeapi1\Main.class
-com\fipeapi1\resources\CargaInicialResource.class
-com\fipeapi1\services\FipeApiClient.class
+com\fipeapi2\entities\Veiculo.class
+com\fipeapi1\resources\VeiculoResource.class
+com\fipeapi2\repositories\VeiculoRepository.class
 com\fipeapi1\services\FipeService.class
+com\fipeapi1\services\VeiculoService.class
+com\fipeapi2\services\FipeProcessingService.class
+com\fipeapi1\resources\MarcaResource.class
