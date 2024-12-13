@@ -17,7 +17,7 @@ public class FipeResource {
     @Path("/carga-inicial")
     public Response acionarCargaInicial() {
         try {
-            fipeService.iniciarCargaMarcas();
+            fipeService.obterMarcas();
             return Response.ok("Carga inicial dos veículos iniciada com sucesso!").build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
