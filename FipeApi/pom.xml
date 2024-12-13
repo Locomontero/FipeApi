@@ -41,6 +41,12 @@
             <artifactId>quarkus-resteasy</artifactId>
         </dependency>
 
+        <!-- Feign Client para Quarkus -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+
         <!-- Quarkus JPA para persistência -->
         <dependency>
             <groupId>io.quarkus</groupId>
