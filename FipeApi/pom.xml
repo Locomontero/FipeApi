@@ -4,34 +4,47 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Informações do projeto -->
     <groupId>com.fipeapi1</groupId>
     <artifactId>FipeApi</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>Fipe API</name>
+    <description>API para acessar dados da Tabela Fipe</description>
+    <url>https://github.com/Locomontero/FipeApi</url>
 
+    <!-- Definição das versões do compilador -->
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- Gerenciamento de dependências -->
     <dependencyManagement>
         <dependencies>
-            <!-- Quarkus BOM para garantir que todas as dependências sejam compatíveis -->
+            <!-- Quarkus BOM para garantir compatibilidade das dependências -->
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-bom</artifactId>
-                <version>2.16.3.Final</version> <!-- Versão mais recente do Quarkus -->
+                <version>2.16.3.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <!-- Dependências do projeto -->
     <dependencies>
         <!-- Quarkus RESTEasy para APIs REST -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy</artifactId>
+        </dependency>
+
+        <!-- Feign Client para Quarkus -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
 
         <!-- Quarkus JPA para persistência -->
@@ -46,10 +59,16 @@
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
 
-        <!-- Quarkus OpenAPI para documentação -->
+            <!-- Dependência do Quarkus para trabalhar com Hibernate e Panache -->
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-hibernate-orm-panache</artifactId>
+            </dependency>
+
+        <!-- Dependência para JSON-B (JSON Binding) no Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-openapi</artifactId>
+            <artifactId>quarkus-jsonb</artifactId>
         </dependency>
 
         <!-- Quarkus Test para testes -->
@@ -59,27 +78,26 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Quarkus REST Client -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-client</artifactId>
         </dependency>
 
-
         <!-- Dependência para Kafka (Reactive Messaging com Kafka) -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
-            <version>2.16.3.Final</version> <!-- Versão compatível com o Quarkus -->
+            <version>2.16.3.Final</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
-            <!-- Plugin do Quarkus -->
+            <!-- Plugin do Quarkus para build -->
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-                <version>2.16.3.Final</version> <!-- Versão mais recente do Quarkus -->
+                <version>2.16.3.Final</version>
                 <executions>
                     <execution>
                         <goals>
@@ -89,6 +107,21 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Plugin do Maven Compiler para adicionar opções de compilação -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version> <!-- Use a versão mais recente se necessário -->
+                <configuration>
+                    <source>17</source> <!-- Ou a versão que você está usando -->
+                    <target>17</target> <!-- Ou a versão que você está usando -->
+                    <compilerArgs>
+                        <arg>-Xlint:unchecked</arg> <!-- Adiciona o parâmetro para verificar operações inseguras -->
+                    </compilerArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
 </project>

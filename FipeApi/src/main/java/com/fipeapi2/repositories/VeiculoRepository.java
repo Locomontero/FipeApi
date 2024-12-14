@@ -1,21 +1,26 @@
 package com.fipeapi2.repositories;
 
 import com.fipeapi2.entities.Veiculo;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+
 import javax.enterprise.context.ApplicationScoped;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 @ApplicationScoped
-public class VeiculoRepository {
-
-    private final EntityManager em;
-
-    public VeiculoRepository(EntityManager em) {
-        this.em = em;
-    }
+public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
 
     @Transactional
-    public void salvarVeiculo(Veiculo veiculo) {
-        em.persist(veiculo);
+    public void persistOrUpdate(Veiculo veiculo) {
+        if (veiculo.getId() == null) {
+            persist(veiculo);
+        } else {
+            Veiculo existingVeiculo = findById(veiculo.getId());
+            if (existingVeiculo != null) {
+                existingVeiculo.setMarca(veiculo.getMarca());
+                existingVeiculo.setModelo(veiculo.getModelo());
+                existingVeiculo.setCodigo(veiculo.getCodigo());
+
+            }
+        }
     }
 }
