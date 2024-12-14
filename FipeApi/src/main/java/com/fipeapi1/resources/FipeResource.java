@@ -25,11 +25,17 @@ public class FipeResource {
     @POST
     @Path("/carga-inicial")
     public Response cargaInicial() {
-        // Aciona o processamento das marcas e envia para a fila
-        fipeService.buscarMarcasEFila();
-        return Response.status(Response.Status.ACCEPTED)  // Status 202 para processos assíncronos
-                .entity("Carga inicial de marcas iniciada. Processamento em andamento.")
-                .build();
+        try {
+            // Aciona o processamento das marcas e envia para a fila
+            fipeService.buscarMarcas();
+            return Response.status(Response.Status.ACCEPTED)  // Status 202 para processos assíncronos
+                    .entity("Carga inicial de marcas iniciada. Processamento em andamento.")
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erro ao iniciar carga inicial: " + e.getMessage())
+                    .build();
+        }
     }
 
     /**

@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+  # API Service
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_USERNAME=usuarioApi_app
+      - DB_PASSWORD=123456
+      - DB_URL=jdbc:postgresql://db:5432/FipeApiDatabase
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092  # Alterei para a porta padrão do Kafka (9092)
+    depends_on:
+      - db
+      - kafka
+
+  # PostgreSQL Service
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=usuarioApi_app
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=FipeApiDatabase
+    ports:
+      - "5432:5432"
+
+  # Kafka Service
+  kafka:
+    image: wurstmeister/kafka
+    environment:
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093  # Porta interna do Kafka
+      - KAFKA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT
+      - KAFKA_LISTENER_NAME=INSIDE
+      - KAFKA_LISTENER_PORT=9093
+      - KAFKA_LISTENER_HOSTNAME=kafka
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181  # Conexão com o Zookeeper
+      - KAFKA_LISTENER_OUTSIDE_PORT=9092  # Expondo a porta externa
+    ports:
+      - "9092:9092"  # Porta externa que será acessível
+    depends_on:
+      - zookeeper
+
+  # Zookeeper Service
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
