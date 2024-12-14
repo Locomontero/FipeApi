@@ -71,12 +71,6 @@
             <artifactId>quarkus-jsonb</artifactId>
         </dependency>
 
-        <!-- Quarkus OpenAPI para documentação -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-openapi</artifactId>
-        </dependency>
-
         <!-- Quarkus Test para testes -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -97,10 +91,9 @@
             <version>2.16.3.Final</version>
         </dependency>
     </dependencies>
-
-    <!-- Definindo o plugin do Quarkus para build -->
     <build>
         <plugins>
+            <!-- Plugin do Quarkus para build -->
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
@@ -114,6 +107,21 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Plugin do Maven Compiler para adicionar opções de compilação -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version> <!-- Use a versão mais recente se necessário -->
+                <configuration>
+                    <source>17</source> <!-- Ou a versão que você está usando -->
+                    <target>17</target> <!-- Ou a versão que você está usando -->
+                    <compilerArgs>
+                        <arg>-Xlint:unchecked</arg> <!-- Adiciona o parâmetro para verificar operações inseguras -->
+                    </compilerArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
 </project>

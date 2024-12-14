@@ -1,8 +1,7 @@
-com\fipeapi1\Main.class
 com\fipeapi2\entities\Veiculo.class
-com\fipeapi1\resources\VeiculoResource.class
 com\fipeapi2\repositories\VeiculoRepository.class
+com\fipeapi1\services\FipeClient.class
 com\fipeapi1\services\FipeService.class
-com\fipeapi1\services\VeiculoService.class
+META-INF\panache-archive.marker
 com\fipeapi2\services\FipeProcessingService.class
-com\fipeapi1\resources\MarcaResource.class
+com\fipeapi1\resources\FipeResource.class
