@@ -2,27 +2,25 @@ package com.fipeapi2.repositories;
 
 import com.fipeapi2.entities.Veiculo;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+
 import javax.enterprise.context.ApplicationScoped;
-import java.util.List;
+import javax.transaction.Transactional;
 
 @ApplicationScoped
 public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
 
-    // Não precisa implementar nada manualmente, Panache cuida disso.
+    @Transactional
+    public void persistOrUpdate(Veiculo veiculo) {
+        if (veiculo.getId() == null) {
+            persist(veiculo);
+        } else {
+            Veiculo existingVeiculo = findById(veiculo.getId());
+            if (existingVeiculo != null) {
+                existingVeiculo.setMarca(veiculo.getMarca());
+                existingVeiculo.setModelo(veiculo.getModelo());
+                existingVeiculo.setCodigo(veiculo.getCodigo());
 
-    public void salvarVeiculo(Veiculo veiculo) {
-        persist(veiculo);  // método do Panache
-    }
-
-    public List<Veiculo> listarVeiculos() {
-        return listAll();  // método do Panache
-    }
-
-    public Veiculo buscarPorId(Long id) {
-        return findById(id);  // método do Panache
-    }
-
-    public void removerVeiculo(Long id) {
-        deleteById(id);  // método do Panache
+            }
+        }
     }
 }

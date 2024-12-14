@@ -1,5 +1,7 @@
 package com.fipeapi2.entities;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -9,7 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-public class Veiculo {
+public class Veiculo extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +32,6 @@ public class Veiculo {
     @Column(nullable = false, length = 50, unique = true)
     private String codigo;
 
-    // Getters e Setters
     public Long getId() {
         return id;
     }
