@@ -4,12 +4,10 @@ import com.fipeapi2.entities.Veiculo;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
 
 @ApplicationScoped
 public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
 
-    @Transactional
     public void persistOrUpdate(Veiculo veiculo) {
         if (veiculo.getId() == null) {
             persist(veiculo);

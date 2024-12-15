@@ -32,6 +32,15 @@ public class Veiculo extends PanacheEntityBase {
     @Column(nullable = false, length = 50, unique = true)
     private String codigo;
 
+    @NotNull(message = "Ano não pode ser nulo")
+    @Size(min = 1, max = 4, message = "O ano deve ter 4 caracteres")
+    @Column(nullable = false, length = 4)
+    private String ano;  // Alterando para String, pois o ano é geralmente tratado como texto
+
+    @NotNull(message = "Preço não pode ser nulo")
+    @Column(nullable = false, precision = 10, scale = 2)
+    private String preco; // Tipo alterado para String ou você pode alterar para BigDecimal se for um valor numérico
+
     public Long getId() {
         return id;
     }
@@ -62,5 +71,21 @@ public class Veiculo extends PanacheEntityBase {
 
     public void setCodigo(String codigo) {
         this.codigo = codigo;
+    }
+
+    public String getAno() {
+        return ano;
+    }
+
+    public void setAno(String ano) {
+        this.ano = ano;
+    }
+
+    public String getPreco() {
+        return preco;
+    }
+
+    public void setPreco(String preco) {
+        this.preco = preco;
     }
 }

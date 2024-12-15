@@ -1,9 +1,12 @@
 package com.fipeapi2.services;
 
+import com.fipeapi1.services.FipeClient;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
-import com.fipeapi1.services.FipeClient;
+import com.fipeapi1.services.FipeService;
 import io.smallrye.mutiny.Multi;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -22,84 +25,74 @@ public class FipeProcessingService {
 
     @Inject
     @RestClient
-    FipeClient fipeClient;  // Cliente para comunicação com a API FIPE
+    FipeClient fipeClient;
 
     @Inject
-    VeiculoRepository veiculoRepository;  // Repositório para persistência de veículos
+    VeiculoRepository veiculoRepository;
 
-    /**
-     * Canal de entrada para processar as marcas recebidas da fila.
-     * Deserializa a mensagem JSON e salva os veículos.
-     */
-    @Incoming("marcas-da-api1")  // Consumindo o canal "marcas-da-api1"
-    public void processarMarca(String mensagem) {
-        // Converte a string JSON para JSONArray
-        JSONArray jsonArray = new JSONArray(mensagem);
+    @Inject
+    FipeService fipeService;  // Serviço para obter dados da FIPE
 
-        List<Map<String, String>> marcas = new ArrayList<>();
+    @Inject
+    @Channel("modelos-da-api2-out")
+    Emitter<String> emitter;  // O canal do Kafka para enviar os dados
 
-        // Itera sobre o JSONArray e converte para List<Map<String, String>>
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            // Converte o JSONObject para um Map<String, String> - fazendo a conversão dos valores para String
-            Map<String, String> marca = (Map<String, String>) (Map<?, ?>) jsonObject.toMap();
-            marcas.add(marca);
-        }
+    // Consumindo marcas do Kafka
+    @Incoming("marcas-da-api1")
+    public void processarMarca(Map<String, String> marca) {
+        String codigoMarca = marca.get("codigo");
+        String nomeMarca = marca.get("nome");
 
-        if (marcas.isEmpty()) {
-            System.out.println("Nenhuma marca recebida.");
-            return;
-        }
+        // Busca os modelos da marca
+        List<Map<String, String>> modelos = fipeService.buscarModelos(codigoMarca);
 
-        // Processa cada marca
-        for (Map<String, String> marca : marcas) {
-            String codigoMarca = marca.get("codigo");
+        // Para cada modelo, busca os anos e preços, e persiste no banco de dados
+        for (Map<String, String> modelo : modelos) {
+            String codigoModelo = modelo.get("codigo");
+            List<Map<String, String>> anos = fipeService.buscarAnos(codigoMarca, codigoModelo);
 
-            // Buscar os modelos dessa marca utilizando a API FIPE
-            Map<String, Object> modelosResponse = fipeClient.obterModelos(codigoMarca);
+            for (Map<String, String> ano : anos) {
+                String codigoAno = ano.get("codigo");
+                Map<String, Object> preco = fipeService.buscarPreco(codigoMarca, codigoModelo, codigoAno);
 
-            if (modelosResponse != null && modelosResponse.containsKey("modelos")) {
-                List<Map<String, String>> modelos = (List<Map<String, String>>) modelosResponse.get("modelos");
+                // Criando e persistindo o veículo
+                Veiculo veiculo = new Veiculo();
+                veiculo.setMarca(nomeMarca);
+                veiculo.setModelo(modelo.get("nome"));
+                veiculo.setCodigo(codigoModelo);
+                veiculo.setAno(ano.get("nome"));
+                veiculo.setPreco(preco.get("preco").toString()); // Supondo que "preco" seja um campo adequado
 
-                // Processar cada modelo encontrado
-                for (Map<String, String> modelo : modelos) {
-                    Veiculo veiculo = new Veiculo();
-                    veiculo.setMarca(marca.get("nome"));  // Nome da marca
-                    veiculo.setCodigo(modelo.get("codigo"));  // Código do modelo
-                    veiculo.setModelo(modelo.get("nome"));  // Nome do modelo
-
-                    // Salva o veículo no banco de dados
-                    veiculoRepository.persist(veiculo);
-                }
-
-                // Agora que os modelos foram processados, você pode produzir os modelos para o canal.
-                enviarModelosParaFila();  // Chamando o método sem parâmetros agora
-            } else {
-                System.out.println("Nenhum modelo encontrado para a marca: " + marca.get("nome"));
+                veiculoRepository.persist(veiculo);  // Persistindo no banco de dados
             }
         }
+
+        // Agora, enviar para o próximo fluxo (opcional) no Kafka
+        enviarModelosParaFila();  // Produzindo os dados para o Kafka
     }
 
+    // Método que envia os modelos para a fila Kafka
     @Transactional
-    @Outgoing("modelos-da-api2-out")
     public Multi<String> enviarModelosParaFila() {
-        List<Veiculo> modelos = obterModelosProcessados();
+        List<Veiculo> veiculos = obterModelosProcessados();
+        JSONArray jsonVeiculos = new JSONArray();
 
-        JSONArray jsonModelos = new JSONArray();
-
-        for (Veiculo veiculo : modelos) {
+        // Convertendo os veículos em JSON
+        for (Veiculo veiculo : veiculos) {
             JSONObject jsonVeiculo = new JSONObject();
             jsonVeiculo.put("id", veiculo.getId());
             jsonVeiculo.put("marca", veiculo.getMarca());
             jsonVeiculo.put("modelo", veiculo.getModelo());
-
-            jsonModelos.put(jsonVeiculo);
+            jsonVeiculo.put("ano", veiculo.getAno());
+            jsonVeiculo.put("preco", veiculo.getPreco());
+            jsonVeiculos.put(jsonVeiculo);
         }
 
-        return Multi.createFrom().item(jsonModelos.toString());
+        return Multi.createFrom().item(jsonVeiculos.toString());
     }
 
+    // Método auxiliar para obter os modelos processados
     private List<Veiculo> obterModelosProcessados() {
-        return veiculoRepository.listAll();  // Aqui você pode transformar para o formato necessário
+        return veiculoRepository.listAll();  // Retorna todos os veículos persistidos
     }
 }

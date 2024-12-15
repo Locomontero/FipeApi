@@ -1,8 +1,8 @@
 package com.fipeapi1.resources;
 
 import com.fipeapi1.services.FipeService;
-import com.fipeapi2.entities.Veiculo; // Importando de API-2
-import com.fipeapi2.repositories.VeiculoRepository; // Importando de API-2
+import com.fipeapi2.entities.Veiculo;
+import com.fipeapi2.repositories.VeiculoRepository;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -13,20 +13,16 @@ import java.util.List;
 public class FipeResource {
 
     @Inject
-    FipeService fipeService;  // Serviço para acessar e processar as marcas da FIPE
+    FipeService fipeService;
 
     @Inject
-    VeiculoRepository veiculoRepository;  // Repositório da API-2 para interagir com a base de dados
+    VeiculoRepository veiculoRepository;
 
-    /**
-     * Endpoint para acionar a carga inicial dos dados de veículos.
-     * Este endpoint chama a API FIPE para buscar as marcas e envia para a fila de processamento.
-     */
     @POST
     @Path("/carga-inicial")
     public Response cargaInicial() {
         try {
-            // Aciona o processamento das marcas e envia para a fila
+
             fipeService.buscarMarcas();
             return Response.status(Response.Status.ACCEPTED)  // Status 202 para processos assíncronos
                     .entity("Carga inicial de marcas iniciada. Processamento em andamento.")
@@ -38,10 +34,6 @@ public class FipeResource {
         }
     }
 
-    /**
-     * Endpoint para buscar as marcas armazenadas no banco de dados.
-     * Este endpoint consulta todas as marcas salvas na base de dados da API-2.
-     */
     @GET
     @Path("/marcas")
     @Produces(MediaType.APPLICATION_JSON)
@@ -56,10 +48,6 @@ public class FipeResource {
         return Response.ok(marcas).build();
     }
 
-    /**
-     * Endpoint para buscar os veículos de uma marca específica.
-     * Este endpoint consulta os modelos e códigos de veículos de uma marca armazenada no banco de dados da API-2.
-     */
     @GET
     @Path("/modelos/{marca}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,10 +62,6 @@ public class FipeResource {
         return Response.ok(modelos).build();
     }
 
-    /**
-     * Endpoint para salvar ou atualizar os dados de um veículo.
-     * Este endpoint recebe os dados alterados de um veículo e salva no banco de dados da API-2.
-     */
     @POST
     @Path("/alterar")
     @Consumes(MediaType.APPLICATION_JSON)

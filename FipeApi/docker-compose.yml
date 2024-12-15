@@ -15,18 +15,18 @@ services:
   kafka:
     image: wurstmeister/kafka
     environment:
-      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093  # Porta interna do Kafka
-      - KAFKA_LISTENERS=INSIDE://0.0.0.0:9093  # Defina o listener explicitamente
-      - KAFKA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT  # Protocolo de segurança
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT  # Mapeia o protocolo para o listener INSIDE
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093,OUTSIDE://localhost:9092  # Defina ambos os listeners
+      - KAFKA_LISTENERS=INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092  # Defina o listener para as duas portas
+      - KAFKA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT  # Defina o protocolo de segurança para ambos os listeners
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT  # Defina o protocolo para INSIDE e OUTSIDE
       - KAFKA_LISTENER_NAME=INSIDE
       - KAFKA_LISTENER_PORT=9092
       - KAFKA_LISTENER_HOSTNAME=kafka
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181  # Conexão com o Zookeeper
       - KAFKA_LISTENER_OUTSIDE_PORT=9092  # Expondo a porta externa
-      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE  # Adicione esta linha para configurar a comunicação entre brokers
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE  # Configuração de comunicação entre brokers
     ports:
-      - "9092:9093"  # Porta externa que será acessível
+      - "9092:9092"  # Porta externa que será acessível
     depends_on:
       - zookeeper
 
