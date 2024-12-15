@@ -83,28 +83,22 @@ public class FipeProcessingService {
     @Transactional
     @Outgoing("modelos-da-api2-out")
     public Multi<String> enviarModelosParaFila() {
-        // Obtém a lista de modelos processados
         List<Veiculo> modelos = obterModelosProcessados();
 
-        // Cria um JSONArray e popula com os modelos
         JSONArray jsonModelos = new JSONArray();
 
         for (Veiculo veiculo : modelos) {
-            // Converte cada Veiculo para JSONObject
             JSONObject jsonVeiculo = new JSONObject();
             jsonVeiculo.put("id", veiculo.getId());
             jsonVeiculo.put("marca", veiculo.getMarca());
             jsonVeiculo.put("modelo", veiculo.getModelo());
-            // Adicione outros campos conforme necessário
 
             jsonModelos.put(jsonVeiculo);
         }
 
-        // Retorna um Multi com a string JSON dos modelos (fluxo reativo)
         return Multi.createFrom().item(jsonModelos.toString());
     }
 
-    // Método auxiliar para obter os modelos processados
     private List<Veiculo> obterModelosProcessados() {
         return veiculoRepository.listAll();  // Aqui você pode transformar para o formato necessário
     }
