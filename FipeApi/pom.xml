@@ -17,6 +17,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Definição da versão do Quarkus -->
+        <quarkus.version>2.16.3.Final</quarkus.version> <!-- Defina a versão do Quarkus aqui -->
     </properties>
 
     <!-- Gerenciamento de dependências -->
@@ -26,7 +29,7 @@
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-bom</artifactId>
-                <version>2.16.3.Final</version>
+                <version>${quarkus.version}</version> <!-- Usando a versão definida acima -->
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -47,6 +50,12 @@
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
 
+        <!-- Quarkus Reactive Messaging para Kafka -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-reactive-messaging</artifactId>
+        </dependency>
+
         <!-- Quarkus JPA para persistência -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -59,16 +68,10 @@
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
 
-            <!-- Dependência do Quarkus para trabalhar com Hibernate e Panache -->
-            <dependency>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-hibernate-orm-panache</artifactId>
-            </dependency>
-
-        <!-- Dependência para JSON-B (JSON Binding) no Quarkus -->
+        <!-- Dependência do Quarkus para trabalhar com Hibernate e Panache -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-jsonb</artifactId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
         </dependency>
 
         <!-- Quarkus Test para testes -->
@@ -84,20 +87,41 @@
             <artifactId>quarkus-rest-client</artifactId>
         </dependency>
 
+        <!-- Dependência para JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
+        </dependency>
+
         <!-- Dependência para Kafka (Reactive Messaging com Kafka) -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
-            <version>2.16.3.Final</version>
+        </dependency>
+
+        <!-- Dependência do javax para persistência de JPA -->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>2.2</version> <!-- Java EE 8 -->
+        </dependency>
+
+        <!-- Dependência para JAX-RS no Quarkus (Caso queira manter javax) -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version> <!-- Java EE 8 -->
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <!-- Plugin do Quarkus para build -->
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
-                <version>2.16.3.Final</version>
+                <version>${quarkus.version}</version> <!-- Usando a versão definida -->
                 <executions>
                     <execution>
                         <goals>
@@ -123,5 +147,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
