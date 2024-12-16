@@ -8,7 +8,6 @@ import io.smallrye.mutiny.Multi;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
-import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,7 +15,7 @@ import org.json.JSONObject;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -61,19 +60,22 @@ public class FipeProcessingService {
                 veiculo.setModelo(modelo.get("nome"));
                 veiculo.setCodigo(codigoModelo);
                 veiculo.setAno(ano.get("nome"));
-                veiculo.setPreco(preco.get("preco").toString()); // Supondo que "preco" seja um campo adequado
 
-                veiculoRepository.persist(veiculo);  // Persistindo no banco de dados
+                // Convertendo o preço de String para BigDecimal
+                BigDecimal precoVeiculo = new BigDecimal(preco.get("preco").toString());
+                veiculo.setPreco(precoVeiculo);  // Usando BigDecimal para o preço
+
+                // Persistindo no banco de dados
+                veiculoRepository.persist(veiculo);
             }
         }
 
-        // Agora, enviar para o próximo fluxo (opcional) no Kafka
+        // Agora, enviar para o próximo fluxo no Kafka
         enviarModelosParaFila();  // Produzindo os dados para o Kafka
     }
 
-    // Método que envia os modelos para a fila Kafka
     @Transactional
-    public Multi<String> enviarModelosParaFila() {
+    public void enviarModelosParaFila() {
         List<Veiculo> veiculos = obterModelosProcessados();
         JSONArray jsonVeiculos = new JSONArray();
 
@@ -84,14 +86,14 @@ public class FipeProcessingService {
             jsonVeiculo.put("marca", veiculo.getMarca());
             jsonVeiculo.put("modelo", veiculo.getModelo());
             jsonVeiculo.put("ano", veiculo.getAno());
-            jsonVeiculo.put("preco", veiculo.getPreco());
+            jsonVeiculo.put("preco", veiculo.getPreco().toString());
+            jsonVeiculo.put("observacoes", veiculo.getObservacoes());
             jsonVeiculos.put(jsonVeiculo);
         }
 
-        return Multi.createFrom().item(jsonVeiculos.toString());
+        emitter.send(jsonVeiculos.toString());
     }
 
-    // Método auxiliar para obter os modelos processados
     private List<Veiculo> obterModelosProcessados() {
         return veiculoRepository.listAll();  // Retorna todos os veículos persistidos
     }

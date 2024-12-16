@@ -22,7 +22,6 @@
         <quarkus.version>2.16.3.Final</quarkus.version> <!-- Defina a versão do Quarkus aqui -->
     </properties>
 
-    <!-- Gerenciamento de dependências -->
     <dependencyManagement>
         <dependencies>
             <!-- Quarkus BOM para garantir compatibilidade das dependências -->
@@ -36,7 +35,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- Dependências do projeto -->
     <dependencies>
         <!-- Quarkus RESTEasy para APIs REST -->
         <dependency>
@@ -48,12 +46,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
-        </dependency>
-
-        <!-- Quarkus Reactive Messaging para Kafka -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-reactive-messaging</artifactId>
         </dependency>
 
         <!-- Quarkus JPA para persistência -->
@@ -81,13 +73,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Quarkus REST Client -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-client</artifactId>
         </dependency>
 
-        <!-- Dependência para JSON -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-jackson</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -100,14 +95,12 @@
             <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
         </dependency>
 
-        <!-- Dependência do javax para persistência de JPA -->
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version> <!-- Java EE 8 -->
+            <version>2.2</version>
         </dependency>
 
-        <!-- Dependência para JAX-RS no Quarkus (Caso queira manter javax) -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>

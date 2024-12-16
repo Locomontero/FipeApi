@@ -1,7 +1,6 @@
 package com.fipeapi2.entities;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -9,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 
 @Entity
 public class Veiculo extends PanacheEntityBase {
@@ -35,11 +35,14 @@ public class Veiculo extends PanacheEntityBase {
     @NotNull(message = "Ano não pode ser nulo")
     @Size(min = 1, max = 4, message = "O ano deve ter 4 caracteres")
     @Column(nullable = false, length = 4)
-    private String ano;  // Alterando para String, pois o ano é geralmente tratado como texto
+    private String ano;
 
     @NotNull(message = "Preço não pode ser nulo")
     @Column(nullable = false, precision = 10, scale = 2)
-    private String preco; // Tipo alterado para String ou você pode alterar para BigDecimal se for um valor numérico
+    private BigDecimal preco;
+
+    @Column(length = 255)  //
+    private String observacoes;
 
     public Long getId() {
         return id;
@@ -81,11 +84,19 @@ public class Veiculo extends PanacheEntityBase {
         this.ano = ano;
     }
 
-    public String getPreco() {
+    public BigDecimal getPreco() {
         return preco;
     }
 
-    public void setPreco(String preco) {
+    public void setPreco(BigDecimal preco) {
         this.preco = preco;
+    }
+
+    public String getObservacoes() {
+        return observacoes;
+    }
+
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
     }
 }

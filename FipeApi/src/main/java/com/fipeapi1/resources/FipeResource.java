@@ -22,7 +22,6 @@ public class FipeResource {
     @Path("/carga-inicial")
     public Response cargaInicial() {
         try {
-
             fipeService.buscarMarcas();
             return Response.status(Response.Status.ACCEPTED)  // Status 202 para processos assíncronos
                     .entity("Carga inicial de marcas iniciada. Processamento em andamento.")
@@ -38,13 +37,14 @@ public class FipeResource {
     @Path("/marcas")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMarcas() {
-        // Retorna todas as marcas armazenadas no banco de dados da API-2
+
         List<Veiculo> marcas = veiculoRepository.listAll();
         if (marcas.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT)
                     .entity("Nenhuma marca encontrada.")
                     .build();
         }
+
         return Response.ok(marcas).build();
     }
 
@@ -52,7 +52,7 @@ public class FipeResource {
     @Path("/modelos/{marca}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getModelosPorMarca(@PathParam("marca") String marca) {
-        // Retorna os modelos e códigos dos veículos de uma marca na API-2
+
         List<Veiculo> modelos = veiculoRepository.find("marca", marca).list();
         if (modelos.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT)
@@ -67,8 +67,19 @@ public class FipeResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response alterarVeiculo(Veiculo veiculo) {
-        // Atualiza ou insere o veículo no banco de dados da API-2
-        veiculoRepository.persistOrUpdate(veiculo);
-        return Response.ok(veiculo).build();
+
+        Veiculo veiculoExistente = veiculoRepository.findById(veiculo.getId());
+        if (veiculoExistente == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Veículo não encontrado.")
+                    .build();
+        }
+
+        veiculoExistente.setModelo(veiculo.getModelo());
+        veiculoExistente.setObservacoes(veiculo.getObservacoes());
+
+        veiculoRepository.persistOrUpdate(veiculoExistente);
+
+        return Response.ok(veiculoExistente).build();
     }
 }
