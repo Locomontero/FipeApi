@@ -16,17 +16,20 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
 
     public void persistOrUpdate(Veiculo veiculo) {
         if (veiculo.getId() == null) {
-            persist(veiculo);  // Persistir novo veículo
+
+            persist(veiculo);
         } else {
             Veiculo existingVeiculo = findById(veiculo.getId());
             if (existingVeiculo != null) {
-                // Atualiza os campos que foram alterados
+
                 existingVeiculo.setMarca(veiculo.getMarca());
                 existingVeiculo.setModelo(veiculo.getModelo());
                 existingVeiculo.setCodigo(veiculo.getCodigo());
-                persistOrUpdate(existingVeiculo); // Chama persistOrUpdate para atualizar
+                existingVeiculo.setAno(veiculo.getAno());
+
+                update(String.valueOf(existingVeiculo));
             } else {
-                // Caso o veículo não exista, então deve ser persistido como novo
+
                 persist(veiculo);
             }
         }

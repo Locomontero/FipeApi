@@ -14,7 +14,7 @@ public interface FipeClient {
 
     @GET
     @Path("/marcas")
-    List<Veiculo> obterMarcas();
+    String obterMarcas();
 
     @GET
     @Path("/carros/marcas/{codigoMarca}/modelos")

@@ -1,15 +1,15 @@
 package com.fipeapi1.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.services.FipeProcessingService;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.Channel;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
 
 @ApplicationScoped
 public class FipeService {
@@ -19,61 +19,54 @@ public class FipeService {
     FipeClient fipeClient;
 
     @Inject
-    FipeProcessingService fipeProcessingService;
+    @Channel("modelos-da-api2")
+    Emitter<String> emitter;
+
+    private ObjectMapper objectMapper = new ObjectMapper(); // Para mapear JSON para objetos
 
     @PostConstruct
     public void carregarVeiculos() {
         try {
-
+            // Chama o método para buscar os veículos da API 1
             List<Veiculo> veiculos = buscarVeiculos();
 
             if (veiculos != null && !veiculos.isEmpty()) {
-                System.out.println("Número de veículos recebidos da API externa: " + veiculos.size()); // Log do tamanho da lista
+                System.out.println("Número de veículos recebidos da API externa: " + veiculos.size());
                 for (Veiculo veiculo : veiculos) {
-                    System.out.println("Veículo - Código: " + veiculo.getCodigo() + ", Nome: " + veiculo.getMarca()); // Log de cada veículo
+                    System.out.println("Veículo - Código: " + veiculo.getCodigo() + ", Nome: " + veiculo.getMarca());
                 }
 
+                // Converte a lista de veículos para JSON antes de enviar para o Kafka
+                String veiculosJson = objectMapper.writeValueAsString(veiculos);
+                enviarVeiculosParaKafka(veiculosJson);
 
-                enviarVeiculosParaKafka(veiculos);
-
-
-                fipeProcessingService.processarVeiculos(veiculos.toString());
             } else {
                 System.out.println("Nenhum veículo recebido da API externa.");
             }
-
         } catch (Exception e) {
             System.out.println("Erro ao carregar os veículos: " + e.getMessage());
         }
     }
 
+    // Método para buscar as marcas de veículos via FipeClient
     public List<Veiculo> buscarVeiculos() {
-        return fipeClient.obterMarcas();
+        String jsonResponse = fipeClient.obterMarcas();  // Aqui retornamos a string JSON
+        try {
+            // Deserializa o JSON em uma lista de Veículos
+            return objectMapper.readValue(jsonResponse, objectMapper.getTypeFactory().constructCollectionType(List.class, Veiculo.class));
+        } catch (Exception e) {
+            System.out.println("Erro ao processar o JSON: " + e.getMessage());
+            return null;
+        }
     }
 
-    private void enviarVeiculosParaKafka(List<Veiculo> veiculos) {
+    // Método para enviar a lista de veículos para o Kafka
+    private void enviarVeiculosParaKafka(String veiculosJson) {
         try {
-
-            JSONArray veiculosJson = new JSONArray();
-            for (Veiculo veiculo : veiculos) {
-                JSONObject veiculoJson = new JSONObject();
-                veiculoJson.put("codigo", veiculo.getCodigo());
-                veiculoJson.put("nome", veiculo.getMarca());
-                veiculosJson.put(veiculoJson);
-            }
-
-            fipeProcessingService.enviarVeiculosParaKafka(veiculosJson.toString());
+            emitter.send(veiculosJson);  // Envia o JSON para o Kafka
             System.out.println("Veículos enviados para o Kafka com sucesso!");
         } catch (Exception e) {
             System.out.println("Erro ao enviar veículos para o Kafka: " + e.getMessage());
         }
-    }
-
-    public List<Map<String, String>> buscarModelos(String codigoVeiculo) {
-        return fipeProcessingService.buscarModelos(codigoVeiculo);  // Chama o serviço da API 2 para buscar os modelos
-    }
-
-    public List<Map<String, String>> buscarAnos(String codigoVeiculo, String codigoModelo) {
-        return fipeProcessingService.buscarAnos(codigoVeiculo, codigoModelo);  // Chama o serviço da API 2 para buscar os anos
     }
 }

@@ -1,5 +1,6 @@
 package com.fipeapi2.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -20,6 +21,7 @@ public class Veiculo extends PanacheEntityBase {
     @NotNull(message = "Marca não pode ser nula")
     @Size(min = 2, max = 100, message = "A marca deve ter entre 2 e 100 caracteres")
     @Column(nullable = false, length = 100)
+    @JsonProperty("nome")
     private String marca;
 
     @NotNull(message = "Modelo não pode ser nulo")
