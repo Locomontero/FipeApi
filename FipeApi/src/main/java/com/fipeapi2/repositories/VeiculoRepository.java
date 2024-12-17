@@ -10,6 +10,7 @@ import java.util.List;
 @ApplicationScoped
 public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
 
+
     public Uni<List<Veiculo>> obterModelosProcessados() {
         return Uni.createFrom().item(listAll());
     }
@@ -19,6 +20,7 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
 
             persist(veiculo);
         } else {
+
             Veiculo existingVeiculo = findById(veiculo.getId());
             if (existingVeiculo != null) {
 
@@ -26,8 +28,10 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
                 existingVeiculo.setModelo(veiculo.getModelo());
                 existingVeiculo.setCodigo(veiculo.getCodigo());
                 existingVeiculo.setAno(veiculo.getAno());
+                existingVeiculo.setPreco(veiculo.getPreco());
+                existingVeiculo.setObservacoes(veiculo.getObservacoes());
 
-                update(String.valueOf(existingVeiculo));
+                existingVeiculo.persist();
             } else {
 
                 persist(veiculo);

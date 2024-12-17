@@ -18,7 +18,7 @@ public interface FipeClient {
 
     @GET
     @Path("/carros/marcas/{codigoMarca}/modelos")
-    Map<String, Object> obterModelos(@PathParam("codigoMarca") String codigoMarca);
+    List<Map<String, Object>> obterModelos(@PathParam("codigoMarca") String codigoMarca);
 
     @GET
     @Path("/carros/marcas/{codigoMarca}/modelos/{codigoModelo}/anos")

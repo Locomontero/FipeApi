@@ -53,7 +53,6 @@ public class FipeResource {
         return Response.ok(veiculos).build();
     }
 
-    // Endpoint para buscar modelos de veículos por marca
     @GET
     @Path("/modelos/{marca}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -68,7 +67,6 @@ public class FipeResource {
         return Response.ok(modelos).build();
     }
 
-    // Endpoint para alterar um veículo
     @POST
     @Path("/alterar")
     @Consumes(MediaType.APPLICATION_JSON)

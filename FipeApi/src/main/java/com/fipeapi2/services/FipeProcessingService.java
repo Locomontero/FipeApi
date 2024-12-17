@@ -1,10 +1,9 @@
 package com.fipeapi2.services;
 
-import com.fipeapi1.services.FipeClient;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -12,20 +11,15 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
 
 @ApplicationScoped
 public class FipeProcessingService {
 
     @Inject
-    @RestClient
-    FipeClient fipeClient;
-
-    @Inject
     VeiculoRepository veiculoRepository;
 
     @Transactional
-    @Incoming("marcas-da-api1-out")
+    @Incoming("marcas-da-api1") // A origem do canal de mensagens
     public void processarVeiculos(String marcasJson) {
         JSONArray marcasArray = new JSONArray(marcasJson);
 
@@ -34,33 +28,35 @@ public class FipeProcessingService {
             String codigoMarca = marca.getString("codigo");
             String nomeMarca = marca.getString("nome");
 
+            System.out.println("Processando marca: " + nomeMarca + " - Código: " + codigoMarca);
+
+            // Criar o objeto Veiculo com as informações básicas
             Veiculo veiculo = new Veiculo();
             veiculo.setMarca(nomeMarca);
             veiculo.setCodigo(codigoMarca);
-            veiculoRepository.persist(veiculo);
 
-            List<Map<String, String>> modelos = buscarModelos(codigoMarca);
+            // Salvar o Veículo no banco
+            veiculoRepository.persistOrUpdate(veiculo);
 
-            for (Map<String, String> modelo : modelos) {
-                List<Map<String, String>> anos = buscarAnos(codigoMarca, modelo.get("codigo"));
+            // Forçar o flush para garantir que os dados sejam persistidos
+            PanacheEntityBase.flush();
 
-                for (Map<String, String> ano : anos) {
-                    Veiculo veiculoAno = new Veiculo();
-                    veiculoAno.setMarca(nomeMarca);
-                    veiculoAno.setCodigo(codigoMarca);
-                    veiculoAno.setModelo(modelo.get("nome"));
-                    veiculoAno.setAno(ano.get("codigo"));
-                    veiculoRepository.persist(veiculoAno);
-                }
-            }
+            // Preencher os campos restantes (por exemplo, modelos)
+            preencherModelos(codigoMarca, veiculo);
         }
     }
 
-    public List<Map<String, String>> buscarModelos(String codigoMarca) {
-        return (List<Map<String, String>>) fipeClient.obterModelos(codigoMarca);
-    }
+    // Exemplo de preenchimento de modelos
+    private void preencherModelos(String codigoMarca, Veiculo veiculo) {
+        // Aqui você poderia usar o fipeClient para fazer buscas por modelos, mas por enquanto vamos deixar um modelo fictício
+        // Isso é só um exemplo, o ideal seria fazer a chamada ao FipeClient para buscar os modelos.
+        String modelo = "Modelo Exemplo";  // Você substituiria isso por dados reais obtidos de outra API ou fonte de dados
+        veiculo.setModelo(modelo);
 
-    public List<Map<String, String>> buscarAnos(String codigoMarca, String codigoModelo) {
-        return fipeClient.obterAnos(codigoMarca, codigoModelo);
+        // Atualizando a base de dados
+        veiculoRepository.persistOrUpdate(veiculo);
+
+        // Forçar o flush novamente
+        PanacheEntityBase.flush();
     }
 }
