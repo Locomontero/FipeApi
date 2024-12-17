@@ -18,41 +18,47 @@ public class FipeResource {
     @Inject
     VeiculoRepository veiculoRepository;
 
+    // Endpoint para realizar a carga inicial
     @POST
     @Path("/carga-inicial")
     public Response cargaInicial() {
         try {
-            fipeService.buscarMarcas();
-            return Response.status(Response.Status.ACCEPTED)  // Status 202 para processos assíncronos
+            // A carga inicial é feita no FipeService, que obtém e processa os dados
+            fipeService.carregarVeiculos();
+
+            return Response.status(Response.Status.ACCEPTED)
                     .entity("Carga inicial de marcas iniciada. Processamento em andamento.")
                     .build();
         } catch (Exception e) {
+            // Em caso de erro, retorna um status 500 com a mensagem de erro
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Erro ao iniciar carga inicial: " + e.getMessage())
                     .build();
         }
     }
 
+    // Endpoint para retornar todos os veículos (marcas) persistidos no banco
     @GET
     @Path("/marcas")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMarcas() {
-
-        List<Veiculo> marcas = veiculoRepository.listAll();
-        if (marcas.isEmpty()) {
+    public Response getVeiculos() {
+        // Busca todos os veículos no banco utilizando o VeiculoRepository
+        List<Veiculo> veiculos = veiculoRepository.listAll();  // Pode ser ajustado para retornar veículos se necessário
+        if (veiculos.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT)
-                    .entity("Nenhuma marca encontrada.")
+                    .entity("Nenhum veículo encontrado.")
                     .build();
         }
 
-        return Response.ok(marcas).build();
+        return Response.ok(veiculos).build();
     }
 
+    // Endpoint para buscar modelos de veículos por marca
     @GET
     @Path("/modelos/{marca}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getModelosPorMarca(@PathParam("marca") String marca) {
-
+        // Busca os modelos da marca no banco
         List<Veiculo> modelos = veiculoRepository.find("marca", marca).list();
         if (modelos.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT)
@@ -62,12 +68,13 @@ public class FipeResource {
         return Response.ok(modelos).build();
     }
 
+    // Endpoint para alterar um veículo
     @POST
     @Path("/alterar")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response alterarVeiculo(Veiculo veiculo) {
-
+        // Procura o veículo pelo ID
         Veiculo veiculoExistente = veiculoRepository.findById(veiculo.getId());
         if (veiculoExistente == null) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -75,9 +82,11 @@ public class FipeResource {
                     .build();
         }
 
+        // Atualiza as propriedades do veículo
         veiculoExistente.setModelo(veiculo.getModelo());
         veiculoExistente.setObservacoes(veiculo.getObservacoes());
 
+        // Persiste ou atualiza o veículo
         veiculoRepository.persistOrUpdate(veiculoExistente);
 
         return Response.ok(veiculoExistente).build();

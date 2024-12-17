@@ -3,19 +3,16 @@ package com.fipeapi2.services;
 import com.fipeapi1.services.FipeClient;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
-import com.fipeapi1.services.FipeService;
-import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -23,78 +20,66 @@ import java.util.Map;
 public class FipeProcessingService {
 
     @Inject
+    VeiculoRepository veiculoRepository;  // Repositório para persistir os dados dos veículos
+
+    @Inject
+    @Channel("modelos-da-api2-out")  // Canal de saída para enviar para o Kafka
+    Emitter<String> emitter;
+
+    @Inject
     @RestClient
-    FipeClient fipeClient;
-
-    @Inject
-    VeiculoRepository veiculoRepository;
-
-    @Inject
-    FipeService fipeService;  // Serviço para obter dados da FIPE
-
-    @Inject
-    @Channel("modelos-da-api2-out")
-    Emitter<String> emitter;  // O canal do Kafka para enviar os dados
-
-    // Consumindo marcas do Kafka
-    @Incoming("marcas-da-api1")
-    public void processarMarca(Map<String, String> marca) {
-        String codigoMarca = marca.get("codigo");
-        String nomeMarca = marca.get("nome");
-
-        // Busca os modelos da marca
-        List<Map<String, String>> modelos = fipeService.buscarModelos(codigoMarca);
-
-        // Para cada modelo, busca os anos e preços, e persiste no banco de dados
-        for (Map<String, String> modelo : modelos) {
-            String codigoModelo = modelo.get("codigo");
-            List<Map<String, String>> anos = fipeService.buscarAnos(codigoMarca, codigoModelo);
-
-            for (Map<String, String> ano : anos) {
-                String codigoAno = ano.get("codigo");
-                Map<String, Object> preco = fipeService.buscarPreco(codigoMarca, codigoModelo, codigoAno);
-
-                // Criando e persistindo o veículo
-                Veiculo veiculo = new Veiculo();
-                veiculo.setMarca(nomeMarca);
-                veiculo.setModelo(modelo.get("nome"));
-                veiculo.setCodigo(codigoModelo);
-                veiculo.setAno(ano.get("nome"));
-
-                // Convertendo o preço de String para BigDecimal
-                BigDecimal precoVeiculo = new BigDecimal(preco.get("preco").toString());
-                veiculo.setPreco(precoVeiculo);  // Usando BigDecimal para o preço
-
-                // Persistindo no banco de dados
-                veiculoRepository.persist(veiculo);
-            }
-        }
-
-        // Agora, enviar para o próximo fluxo no Kafka
-        enviarModelosParaFila();  // Produzindo os dados para o Kafka
-    }
+    FipeClient fipeClient;  // Cliente para consumir a API FIPE
 
     @Transactional
-    public void enviarModelosParaFila() {
-        List<Veiculo> veiculos = obterModelosProcessados();
-        JSONArray jsonVeiculos = new JSONArray();
+    @Incoming("marcas-da-api1")  // Consumindo marcas da fila 'marcas-da-api1'
+    public void processarVeiculos(String marcasJson) {
+        JSONArray marcasArray = new JSONArray(marcasJson);
 
-        // Convertendo os veículos em JSON
-        for (Veiculo veiculo : veiculos) {
-            JSONObject jsonVeiculo = new JSONObject();
-            jsonVeiculo.put("id", veiculo.getId());
-            jsonVeiculo.put("marca", veiculo.getMarca());
-            jsonVeiculo.put("modelo", veiculo.getModelo());
-            jsonVeiculo.put("ano", veiculo.getAno());
-            jsonVeiculo.put("preco", veiculo.getPreco().toString());
-            jsonVeiculo.put("observacoes", veiculo.getObservacoes());
-            jsonVeiculos.put(jsonVeiculo);
+        for (int i = 0; i < marcasArray.length(); i++) {
+            JSONObject marca = marcasArray.getJSONObject(i);
+            String codigoMarca = marca.getString("codigo");
+            String nomeMarca = marca.getString("nome");
+
+            Veiculo veiculo = new Veiculo();
+            veiculo.setMarca(nomeMarca);
+            veiculo.setCodigo(codigoMarca);
+            veiculoRepository.persist(veiculo);
+
+            List<Map<String, String>> modelos = buscarModelos(codigoMarca);
+
+            for (Map<String, String> modelo : modelos) {
+
+                List<Map<String, String>> anos = buscarAnos(codigoMarca, modelo.get("codigo"));
+
+
+                for (Map<String, String> ano : anos) {
+                    Veiculo veiculoAno = new Veiculo();
+                    veiculoAno.setMarca(nomeMarca);
+                    veiculoAno.setCodigo(codigoMarca);
+                    veiculoAno.setModelo(modelo.get("nome"));
+                    veiculoAno.setAno(ano.get("codigo"));  // O código do ano
+                    veiculoRepository.persist(veiculoAno);  // Persiste o ano no banco
+                }
+            }
         }
-
-        emitter.send(jsonVeiculos.toString());
     }
 
-    private List<Veiculo> obterModelosProcessados() {
-        return veiculoRepository.listAll();  // Retorna todos os veículos persistidos
+    // Método para buscar os modelos com base no código da marca
+    public List<Map<String, String>> buscarModelos(String codigoMarca) {
+        return (List<Map<String, String>>) fipeClient.obterModelos(codigoMarca);  // Chama a API FIPE para obter os modelos
+    }
+
+    // Método para buscar os anos com base no código da marca e do modelo
+    public List<Map<String, String>> buscarAnos(String codigoMarca, String codigoModelo) {
+        return fipeClient.obterAnos(codigoMarca, codigoModelo);  // Chama a API FIPE para obter os anos
+    }
+
+    public Uni<List<Veiculo>> obterModelosProcessados() {
+        return (Uni<List<Veiculo>>) veiculoRepository.listAll();  // Retorna a lista de veículos persistidos
+    }
+
+
+    public void enviarVeiculosParaKafka(String marcasJson) {
+        emitter.send(marcasJson);
     }
 }

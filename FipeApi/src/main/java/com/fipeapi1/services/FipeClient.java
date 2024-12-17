@@ -1,5 +1,6 @@
 package com.fipeapi1.services;
 
+import com.fipeapi2.entities.Veiculo;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -7,13 +8,13 @@ import javax.ws.rs.PathParam;
 import java.util.List;
 import java.util.Map;
 
-@Path("/fipe")
-@RegisterRestClient(baseUri = "https://parallelum.com.br/fipe/api/v1")
+@Path("/carros")
+@RegisterRestClient
 public interface FipeClient {
 
     @GET
-    @Path("/carros/marcas")
-    List<Map<String, String>> obterMarcas();
+    @Path("/marcas")
+    List<Veiculo> obterMarcas();
 
     @GET
     @Path("/carros/marcas/{codigoMarca}/modelos")
