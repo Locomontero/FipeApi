@@ -2,7 +2,6 @@ package com.fipeapi1.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fipeapi2.entities.Veiculo;
-import com.fipeapi2.services.FipeProcessingService;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Channel;

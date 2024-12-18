@@ -2,7 +2,6 @@ package com.fipeapi2.services;
 
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,7 +9,6 @@ import org.json.JSONObject;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.List;
 
 @ApplicationScoped
 public class FipeProcessingService {
@@ -19,44 +17,46 @@ public class FipeProcessingService {
     VeiculoRepository veiculoRepository;
 
     @Transactional
-    @Incoming("marcas-da-api1") // A origem do canal de mensagens
+    @Incoming("marcas-da-api1")
     public void processarVeiculos(String marcasJson) {
-        JSONArray marcasArray = new JSONArray(marcasJson);
 
-        for (int i = 0; i < marcasArray.length(); i++) {
-            JSONObject marca = marcasArray.getJSONObject(i);
-            String codigoMarca = marca.getString("codigo");
-            String nomeMarca = marca.getString("nome");
+        try {
+            JSONArray marcasArray = new JSONArray(marcasJson);
 
-            System.out.println("Processando marca: " + nomeMarca + " - Código: " + codigoMarca);
+            for (int i = 0; i < marcasArray.length(); i++) {
+                JSONObject marca = marcasArray.getJSONObject(i);
+                String codigoMarca = marca.optString("codigo");
+                String nomeMarca = marca.optString("nome");
+                String modeloMarca = marca.optString("modelo", "Desconhecido");
 
-            // Criar o objeto Veiculo com as informações básicas
-            Veiculo veiculo = new Veiculo();
-            veiculo.setMarca(nomeMarca);
-            veiculo.setCodigo(codigoMarca);
+                System.out.println("Marca recebida - Nome: " + nomeMarca + " | Código: " + codigoMarca);
 
-            // Salvar o Veículo no banco
-            veiculoRepository.persistOrUpdate(veiculo);
+                // Verifica se o veículo já existe
+                Veiculo veiculoExistente = Veiculo.find("codigo", codigoMarca).firstResult();
 
-            // Forçar o flush para garantir que os dados sejam persistidos
-            PanacheEntityBase.flush();
+                if (veiculoExistente != null) {
+                    // Se o veículo já existe, atualiza os dados
+                    veiculoExistente.setMarca(nomeMarca);
+                    veiculoExistente.setModelo(modeloMarca);  // Atualiza o modelo se necessário
+                    veiculoExistente.setObservacoes(marca.optString("observacoes", null));
 
-            // Preencher os campos restantes (por exemplo, modelos)
-            preencherModelos(codigoMarca, veiculo);
+                    // Não precisa de persistOrUpdate aqui, a transação já garante isso
+                    veiculoExistente.persist();  // Vai persistir a atualização na transação atual
+                } else {
+                    // Se o veículo não existe, cria um novo
+                    Veiculo novoVeiculo = new Veiculo();
+                    novoVeiculo.setMarca(nomeMarca);
+                    novoVeiculo.setCodigo(codigoMarca);
+                    novoVeiculo.setModelo(modeloMarca);
+                    novoVeiculo.setObservacoes(marca.optString("observacoes", null));
+
+                    // Persiste o novo veículo
+                    novoVeiculo.persist();  // Vai persistir o novo veículo dentro da transação
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao processar a mensagem do Kafka: " + e.getMessage());
         }
-    }
-
-    // Exemplo de preenchimento de modelos
-    private void preencherModelos(String codigoMarca, Veiculo veiculo) {
-        // Aqui você poderia usar o fipeClient para fazer buscas por modelos, mas por enquanto vamos deixar um modelo fictício
-        // Isso é só um exemplo, o ideal seria fazer a chamada ao FipeClient para buscar os modelos.
-        String modelo = "Modelo Exemplo";  // Você substituiria isso por dados reais obtidos de outra API ou fonte de dados
-        veiculo.setModelo(modelo);
-
-        // Atualizando a base de dados
-        veiculoRepository.persistOrUpdate(veiculo);
-
-        // Forçar o flush novamente
-        PanacheEntityBase.flush();
     }
 }

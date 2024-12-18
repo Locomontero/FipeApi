@@ -8,34 +8,26 @@ import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 
 @ApplicationScoped
-public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, Long> {
-
+public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, String> {
 
     public Uni<List<Veiculo>> obterModelosProcessados() {
         return Uni.createFrom().item(listAll());
     }
 
     public void persistOrUpdate(Veiculo veiculo) {
-        if (veiculo.getId() == null) {
 
-            persist(veiculo);
+        Veiculo existingVeiculo = find("codigo", veiculo.getCodigo()).firstResult();
+
+        if (existingVeiculo != null) {
+            existingVeiculo.setMarca(veiculo.getMarca());
+            existingVeiculo.setModelo(veiculo.getModelo());
+            existingVeiculo.setObservacoes(veiculo.getObservacoes());
+
+
+            existingVeiculo.persist();
         } else {
 
-            Veiculo existingVeiculo = findById(veiculo.getId());
-            if (existingVeiculo != null) {
-
-                existingVeiculo.setMarca(veiculo.getMarca());
-                existingVeiculo.setModelo(veiculo.getModelo());
-                existingVeiculo.setCodigo(veiculo.getCodigo());
-                existingVeiculo.setAno(veiculo.getAno());
-                existingVeiculo.setPreco(veiculo.getPreco());
-                existingVeiculo.setObservacoes(veiculo.getObservacoes());
-
-                existingVeiculo.persist();
-            } else {
-
-                persist(veiculo);
-            }
+            persist(veiculo);
         }
     }
 }

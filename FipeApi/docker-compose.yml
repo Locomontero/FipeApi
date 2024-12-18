@@ -10,6 +10,8 @@ services:
       - POSTGRES_DB=FipeApiDatabase
     ports:
       - "5432:5432"
+    networks:
+      - fipeapi-network
 
   # Serviço do Kafka
   kafka:
