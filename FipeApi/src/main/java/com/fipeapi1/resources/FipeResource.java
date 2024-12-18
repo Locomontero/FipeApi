@@ -71,7 +71,7 @@ public class FipeResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response alterarVeiculo(Veiculo veiculo) {
         // Procura o veículo pelo ID
-        Veiculo veiculoExistente = veiculoRepository.findById(veiculo.getId());
+        Veiculo veiculoExistente = veiculoRepository.findById(veiculo.getCodigo());
         if (veiculoExistente == null) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("Veículo não encontrado.")
