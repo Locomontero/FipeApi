@@ -30,4 +30,5 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, String>
             persist(veiculo);
         }
     }
+
 }

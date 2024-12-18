@@ -2,6 +2,7 @@ package com.fipeapi1.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fipeapi2.entities.Veiculo;
+import com.fipeapi2.repositories.VeiculoRepository;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -15,18 +16,21 @@ public class FipeService {
 
     @Inject
     @RestClient
-    FipeClient fipeClient;  // Cliente que faz a comunicação com a API externa
+    FipeClient fipeClient;
+
+    @Inject
+    VeiculoRepository veiculoRepository;
 
     @Inject
     @Channel("marcas-da-api1-out")
     Emitter<String> emitter;  // Emitter que envia dados para o Kafka
 
-    private ObjectMapper objectMapper = new ObjectMapper(); // Para mapear objetos para JSON
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void carregarVeiculos() {
         try {
-            // Chama o método para buscar os veículos da API 1
+
             List<Veiculo> veiculos = buscarVeiculos();
 
             if (veiculos != null && !veiculos.isEmpty()) {
@@ -53,11 +57,10 @@ public class FipeService {
         }
     }
 
-    // Método para buscar os veículos via FipeClient
     public List<Veiculo> buscarVeiculos() {
-        String jsonResponse = fipeClient.obterMarcas();  // Aqui retornamos a string JSON da API
+        String jsonResponse = fipeClient.obterMarcas();
         try {
-            // Deserializa o JSON em uma lista de Veículos
+
             return objectMapper.readValue(jsonResponse, objectMapper.getTypeFactory().constructCollectionType(List.class, Veiculo.class));
         } catch (Exception e) {
             System.out.println("Erro ao processar o JSON: " + e.getMessage());
@@ -67,10 +70,33 @@ public class FipeService {
 
     private void enviarVeiculosParaKafka(String veiculosJson) {
         try {
-            emitter.send(veiculosJson);  // Envia o JSON para o Kafka
+            emitter.send(veiculosJson);
             System.out.println("Enviando para Kafka: " + veiculosJson);
         } catch (Exception e) {
             System.out.println("Erro ao enviar veículos para o Kafka: " + e.getMessage());
         }
     }
+
+    public List<Veiculo> getTodosVeiculos() {
+        return veiculoRepository.listAll();
+    }
+
+
+    public Veiculo alterarVeiculo(Veiculo veiculo) {
+        Veiculo veiculoExistente = veiculoRepository.findById(veiculo.getCodigo());
+
+        if (veiculoExistente == null) {
+
+            return null;
+        }
+
+        veiculoExistente.setMarca(veiculo.getMarca());
+        veiculoExistente.setModelo(veiculo.getModelo());
+        veiculoExistente.setObservacoes(veiculo.getObservacoes());
+
+        veiculoRepository.persistOrUpdate(veiculoExistente);
+
+        return veiculoExistente;
+    }
+
 }
