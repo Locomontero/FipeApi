@@ -43,6 +43,22 @@ public class FipeResource {
         return Response.ok(veiculos).build();
     }
 
+    @GET
+    @Path("/veiculos/marca/{marca}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getVeiculoByMarca(@PathParam("marca") String marca) {
+        try {
+            List<Veiculo> veiculos = fipeService.getVeiculoByMarca(marca);
+
+            return Response.ok(veiculos).build();
+        } catch (NotFoundException e) {
+
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+        }
+    }
+
     @POST
     @Path("/alterar")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -57,5 +73,21 @@ public class FipeResource {
                     .build();
         }
         return Response.ok(veiculoAlterado).build();
+    }
+
+    @GET
+    @Path("/veiculo/{codigo}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getVeiculoByCodigo(@PathParam("codigo") String codigo) {
+        try {
+            Veiculo veiculo = fipeService.getVeiculoByCodigo(codigo);
+
+            return Response.ok(veiculo).build();
+        } catch (NotFoundException e) {
+
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(e.getMessage())
+                    .build();
+        }
     }
 }

@@ -3,12 +3,14 @@ package com.fipeapi1.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.annotation.PostConstruct;
+import javax.ws.rs.NotFoundException;
 import java.util.List;
 
 @ApplicationScoped
@@ -97,6 +99,27 @@ public class FipeService {
         veiculoRepository.persistOrUpdate(veiculoExistente);
 
         return veiculoExistente;
+    }
+
+    public List<Veiculo> getVeiculoByMarca(String marca) {
+        List<Veiculo> veiculos = veiculoRepository.findByMarca(marca);
+
+
+        if (veiculos.isEmpty()) {
+            throw new NotFoundException("Veículos com a marca " + marca + " não encontrados.");
+        }
+
+        return veiculos;
+    }
+
+    public Veiculo getVeiculoByCodigo(String codigo) {
+        Veiculo veiculo = veiculoRepository.findByCodigo(codigo);
+
+        if (veiculo == null) {
+            throw new NotFoundException("Veículo com o código " + codigo + " não encontrado.");
+        }
+
+        return veiculo;
     }
 
 }

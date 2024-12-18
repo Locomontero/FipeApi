@@ -19,16 +19,24 @@ public class Veiculo extends PanacheEntityBase {
 
     @Size(min = 1, max = 100, message = "O modelo deve ter entre 1 e 100 caracteres")
     @Column(length = 100)
+    @JsonProperty("modelo")
     private String modelo;
 
     @Id
     @Size(min = 1, max = 50, message = "O código deve ter entre 1 e 50 caracteres")
     @Column(nullable = false, length = 50, unique = true)
+    @JsonProperty("codigo")
     private String codigo;
 
-    @Column(nullable = true,length = 255)  //
+    @Column(nullable = true,length = 255)
+    @JsonProperty("observacoes")
     private String observacoes;
 
+    public Veiculo() {
+    }
+
+    public Veiculo(String marca) {
+    }
 
     public String getMarca() {
         return marca;

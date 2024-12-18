@@ -5,7 +5,10 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, String> {
@@ -14,6 +17,7 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, String>
         return Uni.createFrom().item(listAll());
     }
 
+    @Transactional
     public void persistOrUpdate(Veiculo veiculo) {
 
         Veiculo existingVeiculo = find("codigo", veiculo.getCodigo()).firstResult();
@@ -29,6 +33,20 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, String>
 
             persist(veiculo);
         }
+    }
+
+    public List<Veiculo> findByMarca(String marca) {
+        TypedQuery<Veiculo> query = getEntityManager().createQuery(
+                "SELECT v FROM Veiculo v WHERE LOWER(v.marca) = LOWER(:marca)", Veiculo.class
+        );
+        query.setParameter("marca", marca);
+        return query.getResultList();
+    }
+
+    public Veiculo findByCodigo(String codigo) {
+        TypedQuery<Veiculo> query = getEntityManager().createQuery("SELECT v FROM Veiculo v WHERE v.codigo = :codigo", Veiculo.class);
+        query.setParameter("codigo", codigo);
+        return query.getResultStream().findFirst().orElse(null);
     }
 
 }

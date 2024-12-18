@@ -20,14 +20,4 @@ public interface FipeClient {
     @Path("/carros/marcas/{codigoMarca}/modelos")
     List<Map<String, Object>> obterModelos(@PathParam("codigoMarca") String codigoMarca);
 
-    @GET
-    @Path("/carros/marcas/{codigoMarca}/modelos/{codigoModelo}/anos")
-    List<Map<String, String>> obterAnos(@PathParam("codigoMarca") String codigoMarca,
-                                        @PathParam("codigoModelo") String codigoModelo);
-
-    @GET
-    @Path("/carros/marcas/{codigoMarca}/modelos/{codigoModelo}/anos/{codigoAno}")
-    Map<String, Object> obterPreco(@PathParam("codigoMarca") String codigoMarca,
-                                   @PathParam("codigoModelo") String codigoModelo,
-                                   @PathParam("codigoAno") String codigoAno);
 }
