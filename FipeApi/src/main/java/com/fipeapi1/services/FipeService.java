@@ -1,5 +1,8 @@
 package com.fipeapi1.services;
 
+
+import com.exceptions.JsonProcessingExceptionCustom;
+import com.exceptions.VeiculosNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
@@ -11,9 +14,15 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.NotFoundException;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 @ApplicationScoped
+@Slf4j
+@RequiredArgsConstructor
 public class FipeService {
 
     @Inject
@@ -25,70 +34,69 @@ public class FipeService {
 
     @Inject
     @Channel("marcas-da-api1-out")
-    Emitter<String> emitter;  // Emitter que envia dados para o Kafka
+    Emitter<String> emitter;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void carregarVeiculos() {
-        try {
+        buscarVeiculos()
+                .onItem().transformToUni(veiculos -> {
+                    if (veiculos != null && !veiculos.isEmpty()) {
+                        log.info("Número de veículos recebidos da API externa: {}", veiculos.size());
+                        veiculos.forEach(veiculo ->
+                                log.info("Veículo - Código: {}, Nome: {}", veiculo.getCodigo(), veiculo.getMarca())
+                        );
 
-            List<Veiculo> veiculos = buscarVeiculos();
+                        try {
+                            String veiculosJson = objectMapper.writeValueAsString(veiculos);
+                            veiculosJson = veiculosJson.startsWith("[") ? veiculosJson : "[" + veiculosJson + "]";
 
-            if (veiculos != null && !veiculos.isEmpty()) {
-                System.out.println("Número de veículos recebidos da API externa: " + veiculos.size());
-                for (Veiculo veiculo : veiculos) {
-                    System.out.println("Veículo - Código: " + veiculo.getCodigo() + ", Nome: " + veiculo.getMarca());
-                }
-
-                // Converte a lista de veículos para JSON antes de enviar para o Kafka
-                String veiculosJson = objectMapper.writeValueAsString(veiculos);
-
-                // Caso a String não seja um array JSON, converta ela para um array
-                if (!veiculosJson.startsWith("[")) {
-                    veiculosJson = "[" + veiculosJson + "]";
-                }
-
-                // Envia a String para o Kafka
-                enviarVeiculosParaKafka(veiculosJson);
-            } else {
-                System.out.println("Nenhum veículo recebido da API externa.");
-            }
-        } catch (Exception e) {
-            System.out.println("Erro ao carregar os veículos: " + e.getMessage());
-        }
+                            enviarVeiculosParaKafka(veiculosJson);
+                        } catch (Exception e) {
+                            log.error("Erro ao serializar os veículos para JSON: {}", e.getMessage());
+                            throw new JsonProcessingExceptionCustom("Erro ao serializar os veículos para JSON", e);
+                        }
+                    } else {
+                        log.info("Nenhum veículo recebido da API externa.");
+                    }
+                    return Uni.createFrom().voidItem();
+                })
+                .onFailure().invoke(e -> log.error("Erro ao carregar os veículos: {}", e.getMessage()))
+                .subscribe().with(item -> {}, failure -> {});
     }
 
-    public List<Veiculo> buscarVeiculos() {
-        String jsonResponse = fipeClient.obterMarcas();
-        try {
-
-            return objectMapper.readValue(jsonResponse, objectMapper.getTypeFactory().constructCollectionType(List.class, Veiculo.class));
-        } catch (Exception e) {
-            System.out.println("Erro ao processar o JSON: " + e.getMessage());
-            return null;
-        }
+    public Uni<List<Veiculo>> buscarVeiculos() {
+        return Uni.createFrom().item(() -> {
+            String jsonResponse = fipeClient.obterMarcas();
+            try {
+                return objectMapper.readValue(jsonResponse, objectMapper.getTypeFactory().constructCollectionType(List.class, Veiculo.class));
+            } catch (Exception e) {
+                log.error("Erro ao processar o JSON: {}", e.getMessage());
+                throw new JsonProcessingExceptionCustom("Erro ao processar o JSON", e);
+            }
+        });
     }
 
     private void enviarVeiculosParaKafka(String veiculosJson) {
-        try {
-            emitter.send(veiculosJson);
-            System.out.println("Enviando para Kafka: " + veiculosJson);
-        } catch (Exception e) {
-            System.out.println("Erro ao enviar veículos para o Kafka: " + e.getMessage());
-        }
+        emitter.send(veiculosJson)
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null) {
+                        log.error("Erro ao enviar veículos para o Kafka: {}", throwable.getMessage());
+                    } else {
+                        log.info("Enviando para Kafka: {}", veiculosJson);
+                    }
+                });
     }
 
     public List<Veiculo> getTodosVeiculos() {
         return veiculoRepository.listAll();
     }
 
-
     public Veiculo alterarVeiculo(Veiculo veiculo) {
         Veiculo veiculoExistente = veiculoRepository.findById(veiculo.getCodigo());
 
         if (veiculoExistente == null) {
-
             return null;
         }
 
@@ -104,9 +112,8 @@ public class FipeService {
     public List<Veiculo> getVeiculoByMarca(String marca) {
         List<Veiculo> veiculos = veiculoRepository.findByMarca(marca);
 
-
         if (veiculos.isEmpty()) {
-            throw new NotFoundException("Veículos com a marca " + marca + " não encontrados.");
+            throw new VeiculosNotFoundException(marca);
         }
 
         return veiculos;
@@ -121,5 +128,4 @@ public class FipeService {
 
         return veiculo;
     }
-
 }

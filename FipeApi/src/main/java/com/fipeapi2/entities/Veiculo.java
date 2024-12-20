@@ -5,12 +5,16 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Column;
-
 import javax.validation.constraints.Size;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Veiculo extends PanacheEntityBase {
-
 
     @Size(min = 2, max = 100, message = "A marca deve ter entre 2 e 100 caracteres")
     @Column(nullable = false, length = 100)
@@ -28,45 +32,7 @@ public class Veiculo extends PanacheEntityBase {
     @JsonProperty("codigo")
     private String codigo;
 
-    @Column(nullable = true,length = 255)
+    @Column(nullable = true, length = 255)
     @JsonProperty("observacoes")
     private String observacoes;
-
-    public Veiculo() {
-    }
-
-    public Veiculo(String marca) {
-    }
-
-    public String getMarca() {
-        return marca;
-    }
-
-    public void setMarca(String marca) {
-        this.marca = marca;
-    }
-
-    public String getModelo() {
-        return modelo;
-    }
-
-    public void setModelo(String modelo) {
-        this.modelo = modelo;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public String getObservacoes() {
-        return observacoes;
-    }
-
-    public void setObservacoes(String observacoes) {
-        this.observacoes = observacoes;
-    }
 }

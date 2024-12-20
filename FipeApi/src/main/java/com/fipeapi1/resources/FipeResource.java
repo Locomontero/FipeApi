@@ -75,7 +75,7 @@ public class FipeResource {
         return Response.ok(veiculoAlterado).build();
     }
 
-    @GET
+    @PUT
     @Path("/veiculo/{codigo}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getVeiculoByCodigo(@PathParam("codigo") String codigo) {

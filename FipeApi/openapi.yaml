@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: API de Veículos FIPE
+  version: 1.0.0
+  description: API para consultar, alterar e carregar informações sobre veículos com base na FIPE.
+
+paths:
+
+  /fipe/alterar:
+    post:
+      summary: Altera um veículo existente.
+      operationId: alterarVeiculo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veiculo'
+      responses:
+        '200':
+          description: Veículo alterado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veiculo'
+        '404':
+          description: Veículo não encontrado.
+
+
+components:
+  schemas:
+    Veiculo:
+      type: object
+      properties:
+        marca:
+          type: string
+          description: Marca do veículo
+          minLength: 2
+          maxLength: 100
+          example: "Fiat"
+        modelo:
+          type: string
+          description: Modelo do veículo
+          minLength: 1
+          maxLength: 100
+          example: "Fusca"
+        codigo:
+          type: string
+          description: Código único do veículo
+          minLength: 1
+          maxLength: 50
+          example: "ABC1234"
+        observacoes:
+          type: string
+          description: Observações adicionais sobre o veículo (opcional)
+          maxLength: 255
+          example: "Veículo em ótimo estado de conservação"
+      required:
+        - marca
+        - modelo
+        - codigo
