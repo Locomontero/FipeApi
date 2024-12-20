@@ -1,39 +1,39 @@
-version: '3.7'
 
 services:
-  # Serviço do PostgreSQL
   db:
     image: postgres:latest
     environment:
-      - POSTGRES_USER=usuarioApi_app
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=FipeApiDatabase
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
     networks:
       - fipeapi-network
 
-  # Serviço do Kafka
   kafka:
     image: wurstmeister/kafka
     environment:
-      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093,OUTSIDE://localhost:9092  # Defina ambos os listeners
-      - KAFKA_LISTENERS=INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092  # Defina o listener para as duas portas
-      - KAFKA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT  # Defina o protocolo de segurança para ambos os listeners
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT  # Defina o protocolo para INSIDE e OUTSIDE
-      - KAFKA_LISTENER_NAME=INSIDE
-      - KAFKA_LISTENER_PORT=9092
-      - KAFKA_LISTENER_HOSTNAME=kafka
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181  # Conexão com o Zookeeper
-      - KAFKA_LISTENER_OUTSIDE_PORT=9092  # Expondo a porta externa
-      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE  # Configuração de comunicação entre brokers
+      - KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
+      - KAFKA_LISTENERS=${KAFKA_LISTENERS}
+      - KAFKA_LISTENER_SECURITY_PROTOCOL=${KAFKA_LISTENER_SECURITY_PROTOCOL}
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP}
+      - KAFKA_LISTENER_NAME=${KAFKA_LISTENER_NAME}
+      - KAFKA_LISTENER_PORT=${KAFKA_LISTENER_PORT}
+      - KAFKA_LISTENER_HOSTNAME=${KAFKA_LISTENER_HOSTNAME}
+      - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT}
+      - KAFKA_LISTENER_OUTSIDE_PORT=${KAFKA_LISTENER_OUTSIDE_PORT}
+      - KAFKA_INTER_BROKER_LISTENER_NAME=${KAFKA_INTER_BROKER_LISTENER_NAME}
     ports:
-      - "9092:9092"  # Porta externa que será acessível
+      - "9092:9092"
     depends_on:
       - zookeeper
 
-  # Serviço do Zookeeper
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
+
+networks:
+  fipeapi-network:
+    driver: bridge
