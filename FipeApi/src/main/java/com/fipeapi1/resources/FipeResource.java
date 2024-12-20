@@ -2,6 +2,7 @@ package com.fipeapi1.resources;
 
 import com.fipeapi1.services.FipeService;
 import com.fipeapi2.entities.Veiculo;
+import org.flywaydb.core.Flyway;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -14,6 +15,9 @@ public class FipeResource {
 
     @Inject
     FipeService fipeService;
+
+    @Inject
+    Flyway flyway;
 
     @POST
     @Path("/carga-inicial")
@@ -88,6 +92,18 @@ public class FipeResource {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(e.getMessage())
                     .build();
+        }
+    }
+
+    @GET
+    @Path("/migrate")
+    public String applyMigrations() {
+        try {
+
+            flyway.migrate();
+            return "Migrações aplicadas com sucesso!";
+        } catch (Exception e) {
+            return "Erro ao aplicar migrações: " + e.getMessage();
         }
     }
 }
