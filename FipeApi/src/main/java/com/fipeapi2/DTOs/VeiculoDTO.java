@@ -24,6 +24,7 @@ public class VeiculoDTO {
     @Size(min = 1, max = 50, message = "O código deve ter entre 1 e 50 caracteres.")
     private String codigo;
 
+    @NotNull(message = "O código não pode ser nulo.")
     @Size(max = 255, message = "Observações não podem ter mais de 255 caracteres.")
     private String observacoes;
 }

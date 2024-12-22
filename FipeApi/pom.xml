@@ -3,8 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <!-- Informações do projeto -->
     <groupId>com.fipeapi1</groupId>
     <artifactId>FipeApi</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -12,19 +10,16 @@
     <description>API para acessar dados da Tabela Fipe</description>
     <url>https://github.com/Locomontero/FipeApi</url>
 
-    <!-- Definição das versões do compilador -->
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- Definição da versão do Quarkus -->
-        <quarkus.version>2.16.3.Final</quarkus.version> <!-- Defina a versão do Quarkus aqui -->
+        <quarkus.version>2.16.3.Final</quarkus.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Quarkus BOM para garantir compatibilidade das dependências -->
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-bom</artifactId>
@@ -36,40 +31,53 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Quarkus RESTEasy para APIs REST -->
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy</artifactId>
         </dependency>
 
-        <!-- Feign Client para Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
 
-        <!-- Quarkus JPA para persistência -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm</artifactId>
         </dependency>
 
-        <!-- Quarkus JDBC para PostgreSQL -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
 
-        <!-- Dependência do Quarkus para trabalhar com Hibernate e Panache -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm-panache</artifactId>
         </dependency>
 
-        <!-- Quarkus Test para testes -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -89,7 +97,6 @@
             <version>20210307</version>
         </dependency>
 
-        <!-- Dependência para Kafka (Reactive Messaging com Kafka) -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
@@ -106,23 +113,24 @@
             <artifactId>quarkus-flyway</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <version>2.1.1</version> <!-- Java EE 8 -->
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Plugin do Quarkus para build -->
+
             <plugin>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
@@ -137,16 +145,15 @@
                 </executions>
             </plugin>
 
-            <!-- Plugin do Maven Compiler para adicionar opções de compilação -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version> <!-- Use a versão mais recente se necessário -->
+                <version>3.8.1</version>
                 <configuration>
-                    <source>17</source> <!-- Ou a versão que você está usando -->
-                    <target>17</target> <!-- Ou a versão que você está usando -->
+                    <source>17</source>
+                    <target>17</target>
                     <compilerArgs>
-                        <arg>-Xlint:unchecked</arg> <!-- Adiciona o parâmetro para verificar operações inseguras -->
+                        <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

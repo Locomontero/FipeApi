@@ -32,7 +32,7 @@ public class Veiculo extends PanacheEntityBase {
     @JsonProperty("codigo")
     private String codigo;
 
-    @Column(nullable = true, length = 255)
+    @Column(nullable = false, length = 255)
     @JsonProperty("observacoes")
     private String observacoes;
 }

@@ -1,17 +1,20 @@
 package com.fipeapi2.services;
 
 import com.exceptions.JsonProcessingExceptionCustom;
+import com.fipeapi1.services.FipeClient;
+import com.fipeapi1.services.ModelosResponse;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 @Slf4j
@@ -20,20 +23,23 @@ public class FipeProcessingService {
     @Inject
     VeiculoRepository veiculoRepository;
 
+    @Inject
+    @RestClient
+    FipeClient fipeClient;
+
+    @Inject
+    ObjectMapper objectMapper;
+
     @Transactional
     @Incoming("marcas-da-api1")
     public void processarVeiculos(String marcasJson) {
         try {
-            JSONArray marcasArray = new JSONArray(marcasJson);
+            // Deserializando o JSON das marcas recebido do Kafka
+            List<Map<String, Object>> marcasList = objectMapper.readValue(marcasJson, objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
 
-            // Alterado: Verificar se o objeto é um HashMap ou JSONObject antes de processar
-            marcasArray.toList().forEach(marcaObj -> {
-                if (marcaObj instanceof Map) {
-                    processarMarca(new JSONObject((Map<?, ?>) marcaObj));
-                } else {
-                    log.error("Objeto inesperado recebido: {}", marcaObj.getClass().getName());
-                }
-            });
+            for (Map<String, Object> marcaObj : marcasList) {
+                processarMarca(marcaObj);
+            }
 
         } catch (JsonProcessingExceptionCustom e) {
             log.error("Erro ao processar o JSON da mensagem: {}", e.getMessage());
@@ -42,34 +48,53 @@ public class FipeProcessingService {
         }
     }
 
-    private void processarMarca(JSONObject marca) {
-        String codigoMarca = marca.optString("codigo");
-        String nomeMarca = marca.optString("nome");
-        String modeloMarca = marca.optString("modelo", "Desconhecido");
+    private void processarMarca(Map<String, Object> marca) {
+        String codigoMarca = (String) marca.get("codigo");
+        String nomeMarca = (String) marca.get("nome");
+        String observacoes = (String) marca.getOrDefault("observacoes", "Nenhuma observação");
 
         log.info("Marca recebida - Nome: {} | Código: {}", nomeMarca, codigoMarca);
 
-        Veiculo veiculoExistente = veiculoRepository.find("codigo", codigoMarca).firstResult();
-        if (veiculoExistente != null) {
-            atualizarVeiculo(veiculoExistente, nomeMarca, modeloMarca, marca);
-        } else {
-            criarVeiculo(codigoMarca, nomeMarca, modeloMarca, marca);
+        try {
+            // Obtendo os modelos da marca pela API Fipe usando o RestClient
+            ModelosResponse modelosResponse = fipeClient.obterModelos(codigoMarca);
+
+            // A chave "modelos" contém a lista de modelos, que agora está tipada em ModelosResponse
+            List<ModelosResponse.Modelo> modelos = modelosResponse.getModelos();
+
+            // Determinando o modelo, pegando o nome do primeiro modelo (se existir)
+            final String modeloMarca = Optional.ofNullable(modelos)
+                    .filter(list -> !list.isEmpty())
+                    .map(list -> list.get(0).getNome()) // Acessando o nome do primeiro modelo
+                    .orElse("Desconhecido");
+
+            // Verificar se o veículo já existe na base de dados
+            veiculoRepository.find("codigo", codigoMarca)
+                    .firstResultOptional()
+                    .ifPresentOrElse(
+                            veiculoExistente -> atualizarVeiculo(veiculoExistente, nomeMarca, modeloMarca, observacoes),
+                            () -> criarVeiculo(codigoMarca, nomeMarca, modeloMarca, observacoes)
+                    );
+        } catch (Exception e) {
+            log.error("Erro ao obter modelos para a marca {}: {}", nomeMarca, e.getMessage());
         }
     }
 
-    private void atualizarVeiculo(Veiculo veiculoExistente, String nomeMarca, String modeloMarca, JSONObject marca) {
+    private void atualizarVeiculo(Veiculo veiculoExistente, String nomeMarca, String modeloMarca, String observacoes) {
         veiculoExistente.setMarca(nomeMarca);
         veiculoExistente.setModelo(modeloMarca);
-        veiculoExistente.setObservacoes(marca.optString("observacoes", null));
+        veiculoExistente.setObservacoes(observacoes);
         veiculoExistente.persist();
+        log.info("Veículo atualizado: {} - {}", nomeMarca, modeloMarca);
     }
 
-    private void criarVeiculo(String codigoMarca, String nomeMarca, String modeloMarca, JSONObject marca) {
+    private void criarVeiculo(String codigoMarca, String nomeMarca, String modeloMarca, String observacoes) {
         Veiculo novoVeiculo = new Veiculo();
         novoVeiculo.setMarca(nomeMarca);
         novoVeiculo.setCodigo(codigoMarca);
         novoVeiculo.setModelo(modeloMarca);
-        novoVeiculo.setObservacoes(marca.optString("observacoes", null));
+        novoVeiculo.setObservacoes(observacoes);
         novoVeiculo.persist();
+        log.info("Novo veículo criado: {} - {}", nomeMarca, modeloMarca);
     }
 }

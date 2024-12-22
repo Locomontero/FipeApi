@@ -18,17 +18,23 @@ public class VeiculoRepository implements PanacheRepositoryBase<Veiculo, String>
 
     @Transactional
     public void persistOrUpdate(Veiculo veiculo) {
+
         Veiculo existingVeiculo = find("codigo", veiculo.getCodigo()).firstResult();
 
         if (existingVeiculo != null) {
-            existingVeiculo.setMarca(veiculo.getMarca());
-            existingVeiculo.setModelo(veiculo.getModelo());
-            existingVeiculo.setObservacoes(veiculo.getObservacoes());
+
+            existingVeiculo.setMarca(veiculo.getMarca() != null ? veiculo.getMarca() : existingVeiculo.getMarca());
+            existingVeiculo.setModelo(veiculo.getModelo() != null ? veiculo.getModelo() : existingVeiculo.getModelo());
+            existingVeiculo.setObservacoes(veiculo.getObservacoes() != null ? veiculo.getObservacoes() : existingVeiculo.getObservacoes());
+
             log.info("Atualizando veículo com código {}", veiculo.getCodigo());
-            existingVeiculo.persist();  // Persistindo as alterações
+
+
+            existingVeiculo.persist();
         } else {
+
             log.info("Criando novo veículo com código {}", veiculo.getCodigo());
-            persist(veiculo);  // Persistindo um novo veículo
+            persist(veiculo);
         }
     }
 
