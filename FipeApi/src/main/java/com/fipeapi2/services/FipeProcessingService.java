@@ -34,7 +34,7 @@ public class FipeProcessingService {
     @Incoming("marcas-da-api1")
     public void processarVeiculos(String marcasJson) {
         try {
-            // Deserializando o JSON das marcas recebido do Kafka
+
             List<Map<String, Object>> marcasList = objectMapper.readValue(marcasJson, objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
 
             for (Map<String, Object> marcaObj : marcasList) {
@@ -56,19 +56,16 @@ public class FipeProcessingService {
         log.info("Marca recebida - Nome: {} | Código: {}", nomeMarca, codigoMarca);
 
         try {
-            // Obtendo os modelos da marca pela API Fipe usando o RestClient
+
             ModelosResponse modelosResponse = fipeClient.obterModelos(codigoMarca);
 
-            // A chave "modelos" contém a lista de modelos, que agora está tipada em ModelosResponse
             List<ModelosResponse.Modelo> modelos = modelosResponse.getModelos();
 
-            // Determinando o modelo, pegando o nome do primeiro modelo (se existir)
             final String modeloMarca = Optional.ofNullable(modelos)
                     .filter(list -> !list.isEmpty())
-                    .map(list -> list.get(0).getNome()) // Acessando o nome do primeiro modelo
+                    .map(list -> list.get(0).getNome())
                     .orElse("Desconhecido");
 
-            // Verificar se o veículo já existe na base de dados
             veiculoRepository.find("codigo", codigoMarca)
                     .firstResultOptional()
                     .ifPresentOrElse(

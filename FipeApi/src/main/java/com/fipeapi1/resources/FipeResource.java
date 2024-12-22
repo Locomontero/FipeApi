@@ -21,7 +21,7 @@ public class FipeResource {
     FipeService fipeService;
 
     @Inject
-    VeiculoService veiculoService;  // Injeção do VeiculoService
+    VeiculoService veiculoService;
 
     @Inject
     Flyway flyway;
@@ -30,7 +30,7 @@ public class FipeResource {
     @Path("/carga-inicial")
     public Response cargaInicial() {
         try {
-            // Chamada assíncrona para carregar veículos
+
             fipeService.carregarVeiculos();
             return Response.status(Response.Status.ACCEPTED)
                     .entity("Carga inicial de marcas iniciada. Processamento em andamento.")
