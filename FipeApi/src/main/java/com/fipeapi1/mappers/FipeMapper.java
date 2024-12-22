@@ -3,7 +3,7 @@ package com.fipeapi1.mappers;
 import com.exceptions.JsonProcessingExceptionCustom;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fipeapi2.entities.Veiculo;
-import com.fipeapi2.DTOs.VeiculoDTO;
+import com.fipeapi2.DTO.VeiculoDTO;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.List;

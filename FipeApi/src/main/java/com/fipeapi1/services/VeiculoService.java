@@ -1,7 +1,7 @@
 package com.fipeapi1.services;
 
 import com.fipeapi1.mappers.FipeMapper;
-import com.fipeapi2.DTOs.VeiculoDTO;
+import com.fipeapi2.DTO.VeiculoDTO;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
 import com.exceptions.VeiculosNotFoundException;

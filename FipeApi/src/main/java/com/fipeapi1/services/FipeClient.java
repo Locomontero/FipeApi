@@ -1,5 +1,6 @@
 package com.fipeapi1.services;
 
+import com.fipeapi1.DTO.ModelosResponse;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

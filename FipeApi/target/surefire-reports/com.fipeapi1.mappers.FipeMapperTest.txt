@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: com.fipeapi1.mappers.FipeMapperTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 8.909 s <<< FAILURE! - in com.fipeapi1.mappers.FipeMapperTest
+com.fipeapi1.mappers.FipeMapperTest.testSerializeVeiculosToJsonWithError  Time elapsed: 0.06 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected com.exceptions.JsonProcessingExceptionCustom to be thrown, but nothing was thrown.
+	at com.fipeapi1.mappers.FipeMapperTest.testSerializeVeiculosToJsonWithError(FipeMapperTest.java:48)
+
+com.fipeapi1.mappers.FipeMapperTest.testSerializeVeiculosToJson  Time elapsed: 0.039 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <[{"codigo":"1234","marca":"Marca Teste","modelo":"Modelo Teste","observacoes":"Observações Teste"}]> but was: <[{"nome":"Marca Teste","modelo":"Modelo Teste","codigo":"1234","observacoes":"Observações Teste"}]>
+	at com.fipeapi1.mappers.FipeMapperTest.testSerializeVeiculosToJson(FipeMapperTest.java:39)
+

@@ -1,4 +1,4 @@
-package com.fipeapi1.services;
+package com.fipeapi1.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

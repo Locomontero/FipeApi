@@ -2,7 +2,7 @@ package com.fipeapi1.resources;
 
 import com.fipeapi1.services.FipeService;
 import com.fipeapi1.services.VeiculoService;
-import com.fipeapi2.DTOs.VeiculoDTO;
+import com.fipeapi2.DTO.VeiculoDTO;
 import com.fipeapi2.entities.Veiculo;
 import org.flywaydb.core.Flyway;
 

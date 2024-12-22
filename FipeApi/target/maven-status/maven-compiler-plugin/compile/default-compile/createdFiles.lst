@@ -1,9 +1,12 @@
+com\fipeapi1\DTO\ModelosResponse$Modelo.class
+com\fipeapi1\DTO\ModelosResponse.class
 com\fipeapi1\mappers\FipeMapper.class
+com\fipeapi1\services\VeiculoService.class
 com\fipeapi1\resources\FipeResource.class
 com\exceptions\JsonProcessingExceptionCustom.class
 com\exceptions\GlobalExceptionHandler.class
+com\fipeapi2\DTO\VeiculoDTO.class
 com\exceptions\VeiculosNotFoundException.class
-com\fipeapi2\DTOs\VeiculoDTO.class
 com\fipeapi2\entities\Veiculo.class
 com\fipeapi2\repositories\VeiculoRepository.class
 com\fipeapi1\services\FipeClient.class

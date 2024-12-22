@@ -55,7 +55,7 @@ public class FipeService {
         }
     }
 
-    private void enviarParaKafka(String veiculosJson) {
+    public void enviarParaKafka(String veiculosJson) {
         emitter.send(veiculosJson)
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {

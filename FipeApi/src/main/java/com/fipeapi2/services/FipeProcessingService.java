@@ -2,7 +2,7 @@ package com.fipeapi2.services;
 
 import com.exceptions.JsonProcessingExceptionCustom;
 import com.fipeapi1.services.FipeClient;
-import com.fipeapi1.services.ModelosResponse;
+import com.fipeapi1.DTO.ModelosResponse;
 import com.fipeapi2.entities.Veiculo;
 import com.fipeapi2.repositories.VeiculoRepository;
 import lombok.extern.slf4j.Slf4j;

@@ -1,11 +1,11 @@
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\services\FipeClient.java
-C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi2\DTOs\VeiculoDTO.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\services\FipeService.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\services\VeiculoService.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\exceptions\GlobalExceptionHandler.java
+C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi2\DTO\VeiculoDTO.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi2\services\FipeProcessingService.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\mappers\FipeMapper.java
-C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\services\ModelosResponse.java
+C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\DTO\ModelosResponse.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\fipeapi1\resources\FipeResource.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\exceptions\ErrorMessage.java
 C:\Users\DELL\IdeaProjects\Api\FipeApi\src\main\java\com\exceptions\JsonProcessingExceptionCustom.java

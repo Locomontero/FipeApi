@@ -1,4 +1,4 @@
-package com.fipeapi2.DTOs;
+package com.fipeapi2.DTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
